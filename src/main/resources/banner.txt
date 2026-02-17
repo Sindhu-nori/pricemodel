@@ -1,0 +1,5 @@
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |P|a|y|n|o|v|a|-|P|r|i|c|e|m|o|d|e|l|
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}

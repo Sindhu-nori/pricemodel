@@ -1,0 +1,87 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.5'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.graalvm.buildtools.native' version '0.10.2'
+}
+
+group = 'com.dtt'
+version = '0.0.1'
+description = 'Paynova Price Model - GraalVM Native'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+springBoot {
+	mainClass = 'com.dtt.NewPriceModelApplication'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	// Web
+	implementation('org.springframework.boot:spring-boot-starter-web') {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+	}
+	implementation 'org.springframework.boot:spring-boot-starter-undertow'
+
+	// JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// Hibernate native support
+	implementation 'org.hibernate.orm:hibernate-graalvm'
+
+	// JBoss logging runtime
+	implementation 'org.jboss.logging:jboss-logging:3.5.3.Final'
+
+	// 🔴 REQUIRED for Hibernate native logging
+	annotationProcessor 'org.jboss.logging:jboss-logging-processor:3.0.3.Final'
+	compileOnly 'org.jboss.logging:jboss-logging-annotations:3.0.3.Final'
+
+	// Database
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Jackson
+	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+}
+
+
+
+/* ===============================
+   AOT PROCESSING
+   =============================== */
+tasks.withType(org.springframework.boot.gradle.tasks.aot.ProcessAot).configureEach {
+	systemProperty "spring.profiles.active", "native"
+	systemProperty "spring.cloud.vault.enabled", "false"
+}
+
+/* ===============================
+   GRAALVM NATIVE CONFIG
+   =============================== */
+graalvmNative {
+	binaries {
+		main {
+			imageName = 'pricemodel-native'
+			mainClass = 'com.dtt.NewPriceModelApplication'
+
+			buildArgs.add('--no-fallback')
+			buildArgs.add('--verbose')
+
+			// Spring
+			buildArgs.add('-Dspring.profiles.active=native')
+			buildArgs.add('-Dspring.cloud.vault.enabled=false')
+
+			// 🔴 REQUIRED: Hibernate logging at runtime
+			//buildArgs.add('--initialize-at-run-time=org.hibernate,org.jboss.logging')
+
+			// PostgreSQL driver at runtime
+			buildArgs.add('--initialize-at-run-time=org.postgresql')
+		}
+	}
+}
