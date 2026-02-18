@@ -1,10 +1,9 @@
 package com.dtt.controller;
 
+import com.dtt.requestdto.WalletTransactionFilterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import com.dtt.responsedto.ApiResponse;
 import com.dtt.service.iface.WalletCustomerIface;
@@ -29,5 +28,14 @@ public class WalletCustomerController {
 	@GetMapping("/get/wallettransaction/{ouid}")
 	public ApiResponse<?> getWalletTransactionHistoryByOuid(@PathVariable("ouid") String ouid) {
 		return customerIface.getWalletTransactionHistoryByOuid(ouid);
+	}
+
+	@PostMapping("/wallet/transaction/{ouid}")
+	public ApiResponse<?> postAuditLogsByFilters(
+			@PathVariable("ouid") String ouid,
+			@Validated @RequestBody WalletTransactionFilterDTO pageDTO) {
+
+		return customerIface.getWalletTransactionHistoryByOuidWithFilters(ouid,pageDTO);
+
 	}
 }
